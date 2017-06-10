@@ -20,4 +20,8 @@ router.post('/password-reset', function (req, res) {
   })
 });
 
+function sendMail(user){
+  //
+}
+
 module.exports = router;
