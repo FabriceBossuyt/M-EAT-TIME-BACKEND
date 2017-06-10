@@ -34,13 +34,17 @@ router.get('/facebook',
   }
 );
 
-router.get('/facebook/callback', 
+router.get('/facebook/callback',
   passport.authenticate('facebook', { session: false, failureRedirect: "/" }),
-  function(req, res) {
+  function (req, res) {
     var user = User.forge(req.user);
     var token = jwt.encode(user.omit('password'), securityConfig.jwtSecret);
     res.json({ success: true, token: `JWT ${token}` });
   }
 );
+
+router.get('/password-reset', function () {
+
+});
 
 module.exports = router;
