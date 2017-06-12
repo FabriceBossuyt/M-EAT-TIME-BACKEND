@@ -10,10 +10,9 @@ var conn = {
 var Promise = require('bluebird');
 var userMigration = require('./user/user.migration.js')
 var roleMigration = require('./role/role.migration.js');
+var passwordResetMigration = require('./password_reset_token/password_reset_token.migration.js');
 var userRoleMigration = require('./user_role/user_role.migration.js');
 var knex = require('knex')(require('./config/database.config.js'));
-var userTableMade = false;
-var rolesTableMade = false;
 
 var knex2 = require('knex')({ client: 'mysql', connection: conn });
 
@@ -44,6 +43,14 @@ module.exports = function initDb() {
             userRoleMigration.up().then(function () {
               console.log("User_role table made")
             });
+          }
+        })
+
+        yield knex.schema.hasTable('password_reset_token').then(function (exists) {
+          if (!exists) {
+            passwordResetMigration.up().then(function () {
+              console.log("Password_reset_token table made")
+            })
           }
         })
 

@@ -14,8 +14,7 @@ exports.up = function () {
       table.string('email').unique().notNullable();
       table.string('facebook_id').unique();
       table.string('facebook_access_token');
-      table.string('password_reset_token');
-      table.date('password_reset_token_ttl')
+      table.integer('password_reset_token_id').unsigned().references('password_reset_token.id');
       table.timestamps();
     })
 };

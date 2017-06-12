@@ -4,9 +4,11 @@ var express = require('express');
 var jwt = require('jwt-simple');
 var Promise = require('bluebird');
 var User = require('../user/user.model.js');
+var ResetToken = require('../password_reset_token/password_reset_token.model.js')
 var securityConfig = require('../config/security.config.js');
 var passport = require('passport')
-var crypto  = require('crypto')
+var crypto = require('crypto')
+var moment = require('moment');
 
 const router = express.Router();
 
@@ -31,7 +33,7 @@ router.post('/register', (req, res) => {
 });
 
 router.get('/facebook',
-  passport.authenticate('facebook', { session: false, scope: ['email'] }), function (req, res) {}
+  passport.authenticate('facebook', { session: false, scope: ['email'] }), function (req, res) { }
 );
 
 router.get('/facebook/callback',
@@ -43,26 +45,19 @@ router.get('/facebook/callback',
   }
 );
 
-router.post('/reset-password', function (req, res) {
-  var user = User.forge({password_reset_token: token});
-  user.fetch().then (function(model){
-    if (moment() > model.password_reset_token_ttl)
-      res.json({success : false, msg : 'Token timed out'});
-    else 
-      res.json({success: true, msg: ''});
-  })
-});
-
 router.post('/password-reset', function (req, res) {
   var email = req.body.email;
   var user = User.forge({ email: email });
 
   user.fetch().then(function (model) {
-    if (model && !model.facebook_id) {
-      var token = crypto.randomBytes(8).toString();
+    if (model && !model.attributes.facebook_id) {
+      var token = Math.floor(10000000 + Math.random() * 90000000).toString();
       console.log(token)
-      user.save({ password_reset_token: token, password_reset_token_ttl: moment().add(1, 'hours')}).then(function(response){
-        sendMail(response.attributes)
+      ResetToken.forge({token: token, ttl: new Date(moment().add(1, 'hours')), user_id: model.attributes.id }, {hasTimeStamps: true}).save().then(function (resetToken) {
+        console.log(resetToken)
+        model.save({ password_reset_token_id: resetToken.attributes.id });
+        sendMail(resetToken)
+        res.json({ success: true, msg: 'Succccc' })
       })
     }
     else
@@ -70,12 +65,29 @@ router.post('/password-reset', function (req, res) {
   })
 });
 
-router.post('/password-change', function(req, res){
-  var password = req.body.password; 
+router.post('/password-change', function (req, res) {
+  var token = req.body.token;
+  var password = req.body.password;
+  var email = req.body.email;
 
+  Promise.coroutine(function* () {
+    var user = yield User.where('email', email).fetch({withRelated: ['password_reset_token']});
+    var isExpired = yield user.resetToken().ttl < moment();
+    var isValidToken = yield user.resetToken().isValidToken(token);
+
+    if (isExpired)
+      res.json({ success: false, msg: 'Token expired' });
+
+    if (isValidToken) {
+      user.save({password: password});
+      res.json({success: true, msg: 'Password Updated'})
+    } else {
+      res.json({ success: false, msg: 'Invalid Code' });
+    }
+  })().catch(err => console.log(err));
 })
 
-function sendMail(user){
+function sendMail(user) {
   //implement mail sending api
   var mailContent = 'token  + text'
   var mailTo = user.email;
