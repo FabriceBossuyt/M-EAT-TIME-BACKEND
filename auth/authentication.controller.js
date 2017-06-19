@@ -19,9 +19,9 @@ router.post('/login', (req, res) => {
     const isValidPassword = yield user.validPassword(password);
     if (isValidPassword) {
       const token = jwt.encode(user.omit('password'), securityConfig.jwtSecret);
-      res.json({ success: true, token: `JWT ${token}` });
+      res.status(200).send({ token: `JWT ${token}` });
     } else {
-      res.json({ success: false, msg: 'Authentication failed' });
+      res.status(500).send();
     }
   })().catch(err => console.log(err));
 });
@@ -29,7 +29,10 @@ router.post('/login', (req, res) => {
 router.post('/register', (req, res) => {
   const { username, password, email, first_name, last_name } = req.body;
   User.forge({ username, password, email, first_name, last_name }, { hasTimeStamps: true }).save()
-    .then(user => res.json(user.omit('password')));
+    .then(user => res.status(200).send(user.omit('password')))
+    .catch(error =>
+      res.status(500).send({ msg: error })
+    );
 });
 
 router.get('/facebook',
@@ -41,7 +44,20 @@ router.get('/facebook/callback',
   function (req, res) {
     var user = User.forge(req.user);
     var token = jwt.encode(user.omit('password'), securityConfig.jwtSecret);
-    res.json({ success: true, token: `JWT ${token}` });
+    res.status(200).send({token: `JWT ${token}` });
+  }
+);
+
+router.get('/google',
+  passport.authenticate('google', { session: false, scope: ['profile', 'email']}), function (req, res) { }
+);
+
+router.get('/google/callback',
+  passport.authenticate('google', { session: false, failureRedirect: "/" }),
+  function (req, res) {
+    var user = User.forge(req.user);
+    var token = jwt.encode(user.omit('password'), securityConfig.jwtSecret);
+    res.status(200).send({token: `JWT ${token}` });
   }
 );
 
@@ -50,18 +66,16 @@ router.post('/password-reset', function (req, res) {
   var user = User.forge({ email: email });
 
   user.fetch().then(function (model) {
-    if (model && !model.attributes.facebook_id) {
+    if (model && (!model.attributes.facebook_id || !model.attributes.google_id)) {
       var token = Math.floor(10000000 + Math.random() * 90000000).toString();
-      console.log(token)
-      ResetToken.forge({token: token, ttl: new Date(moment().add(1, 'hours')), user_id: model.attributes.id }, {hasTimeStamps: true}).save().then(function (resetToken) {
-        console.log(resetToken)
+      ResetToken.forge({ token: token, ttl: new Date(moment().add(1, 'hours')), user_id: model.attributes.id }, { hasTimeStamps: true }).save().then(function (resetToken) {
         model.save({ password_reset_token_id: resetToken.attributes.id });
         sendMail(resetToken)
-        res.json({ success: true, msg: 'Succccc' })
+        res.status(200).send({msg: 'Succccc' })
       })
     }
     else
-      res.json({ success: false, msg: 'No such user' })
+      res.status(500).send({msg: 'No such user' })
   })
 });
 
@@ -71,18 +85,18 @@ router.post('/password-change', function (req, res) {
   var email = req.body.email;
 
   Promise.coroutine(function* () {
-    var user = yield User.where('email', email).fetch({withRelated: ['password_reset_token']});
+    var user = yield User.where('email', email).fetch({ withRelated: ['password_reset_token'] });
     var isExpired = yield user.resetToken().ttl < moment();
     var isValidToken = yield user.resetToken().isValidToken(token);
 
     if (isExpired)
-      res.json({ success: false, msg: 'Token expired' });
+      res.status(500).send({msg: 'Token expired' });
 
     if (isValidToken) {
-      user.save({password: password});
-      res.json({success: true, msg: 'Password Updated'})
+      user.save({ password: password });
+      res.status(200).send({msg: 'Password Updated' })
     } else {
-      res.json({ success: false, msg: 'Invalid Code' });
+      res.status(500).send({msg: 'Invalid Code' });
     }
   })().catch(err => console.log(err));
 })

@@ -42,6 +42,8 @@ module.exports = ModelBase.extend({
     password : Joi.string(),
     facebook_access_token: Joi.string(), 
     password_reset_token: Joi.string(), 
-    password_reset_token_ttl: Joi.date()
+    password_reset_token_ttl: Joi.date(), 
+    google_id : Joi.string(), 
+    google_access_token : Joi.string()
   }
 });
