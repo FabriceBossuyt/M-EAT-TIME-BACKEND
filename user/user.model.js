@@ -36,7 +36,7 @@ module.exports = ModelBase.extend({
   validate: {
     first_name : Joi.string().min(2).max(25), 
     last_name : Joi.string().min(2).max(25), 
-    username : Joi.string().min(2).max(25), 
+    //username : Joi.string().min(2).max(25), 
     email : Joi.string().email(), 
     facebook_id : Joi.string(), 
     password : Joi.string(),

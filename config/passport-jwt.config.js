@@ -30,7 +30,7 @@ var createFacebookUser = function (user, accessToken, profile) {
     facebook_access_token: accessToken, first_name: profile.name.givenName,
     last_name: profile.name.familyName,
     email: profile.emails[0].value,
-    username: profile.name.givenName + profile.name.familyName
+    //username: profile.name.givenName + profile.name.familyName
   });
 }
 
@@ -39,7 +39,7 @@ var createGoogleUser = function(user, accessToken, profile){
     google_access_token: accessToken, first_name: profile.name.givenName,
     last_name: profile.name.familyName,
     email: profile.emails[0].value,
-    username: profile.name.givenName + profile.name.familyName
+    //username: profile.name.givenName + profile.name.familyName
   });
 }
 

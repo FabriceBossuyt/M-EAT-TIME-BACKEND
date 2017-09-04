@@ -13,9 +13,10 @@ var moment = require('moment');
 const router = express.Router();
 
 router.post('/login', (req, res) => {
-  const { username, password } = req.body;
+  var email = req.body.email;$
+  var password = req.body.password
   Promise.coroutine(function* () {
-    const user = yield User.where('username', username).fetch();
+    const user = yield User.where('email', email).fetch();
     const isValidPassword = yield user.validPassword(password);
     if (isValidPassword) {
       const token = jwt.encode(user.omit('password'), securityConfig.jwtSecret);
@@ -27,8 +28,11 @@ router.post('/login', (req, res) => {
 });
 
 router.post('/register', (req, res) => {
-  const { username, password, email, first_name, last_name } = req.body;
-  User.forge({ username, password, email, first_name, last_name }, { hasTimeStamps: true }).save()
+  var password = req.body.password
+  var email = req.body.email
+  var first_name = req.body.first_name
+  var last_name = req.body.last_name
+  User.forge({password, email, first_name, last_name }, { hasTimeStamps: true }).save()
     .then(user => res.status(200).send(user.omit('password')))
     .catch(error =>
       res.status(500).send({ msg: error })

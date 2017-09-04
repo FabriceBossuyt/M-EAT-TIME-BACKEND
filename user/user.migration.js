@@ -9,7 +9,7 @@ exports.up = function () {
       table.increments('id').primary();
       table.string('first_name').notNullable();
       table.string('last_name').notNullable();
-      table.string('username').unique().notNullable();
+      //table.string('username').unique().notNullable();
       table.string('password');
       table.string('email').unique().notNullable();
       table.string('facebook_id').unique();
