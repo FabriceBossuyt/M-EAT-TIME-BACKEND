@@ -13,7 +13,10 @@ var moment = require('moment');
 const router = express.Router();
 
 router.post('/login', (req, res) => {
-  var email = req.body.email;$
+  console.log('Attempting to log in ')
+  console.log(req.body);
+
+  var email = req.body.email;
   var password = req.body.password
   Promise.coroutine(function* () {
     const user = yield User.where('email', email).fetch();
@@ -22,20 +25,30 @@ router.post('/login', (req, res) => {
       const token = jwt.encode(user.omit('password'), securityConfig.jwtSecret);
       res.status(200).send({ token: `JWT ${token}` });
     } else {
+      console.log("SOMETIN WONG")
+      console.log("INValid password")
       res.status(500).send();
     }
   })().catch(err => console.log(err));
 });
 
 router.post('/register', (req, res) => {
+  console.log('Creating user from ');
+  console.log(req.body)
+
   var password = req.body.password
   var email = req.body.email
   var first_name = req.body.first_name
   var last_name = req.body.last_name
+
   User.forge({password, email, first_name, last_name }, { hasTimeStamps: true }).save()
-    .then(user => res.status(200).send(user.omit('password')))
-    .catch(error =>
+    .then(user => {
+      console.log('Creating user')
+      res.status(200).send(user.omit('password'))})
+    .catch(error =>{
       res.status(500).send({ msg: error })
+      console.log(error)
+    }
     );
 });
 
@@ -66,20 +79,22 @@ router.get('/google/callback',
 );
 
 router.post('/password-reset', function (req, res) {
+  console.log('Password reset requested')
   var email = req.body.email;
   var user = User.forge({ email: email });
 
   user.fetch().then(function (model) {
     if (model && (!model.attributes.facebook_id || !model.attributes.google_id)) {
       var token = Math.floor(10000000 + Math.random() * 90000000).toString();
-      ResetToken.forge({ token: token, ttl: new Date(moment().add(1, 'hours')), user_id: model.attributes.id }, { hasTimeStamps: true }).save().then(function (resetToken) {
-        model.save({ password_reset_token_id: resetToken.attributes.id });
+      model.passwordResetToke().create({ token: token, ttl: new Date(moment().add(1, 'hours')), user_id: model.attributes.id }, { hasTimeStamps: true }).save().then(function (resetToken) {
+
         sendMail(resetToken)
         res.status(200).send({msg: 'Succccc' })
       })
     }
-    else
-      res.status(500).send({msg: 'No such user' })
+    else{
+      res.status(404).send({msg: 'No such user' })
+    }
   })
 });
 
@@ -109,6 +124,7 @@ function sendMail(user) {
   //implement mail sending api
   var mailContent = 'token  + text'
   var mailTo = user.email;
+  console.log("mailto")
 }
 
 module.exports = router;
