@@ -56,6 +56,11 @@ router.get('/facebook',
   passport.authenticate('facebook', { session: false, scope: ['email'] }), function (req, res) { }
 );
 
+router.post('/facebook', (req, res) => {
+  var accessToken = req.body.accessToken; 
+}
+);
+
 router.get('/facebook/callback',
   passport.authenticate('facebook', { session: false, failureRedirect: "/" }),
   function (req, res) {

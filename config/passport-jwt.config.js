@@ -60,7 +60,7 @@ module.exports = function () {
 
   passport.use(new FacebookStrategy(facebookOptions, function (accessToken, refreshToken, profile, done) {
     var user = User.forge({ facebook_id: profile.id })
-    user.fetch().then(function (model) {
+    user.fetch({ withRelated: 'roles' }).then(function (model) {
       if (model) {
         updateFacebookUser(user, accessToken).then(function (response) {
           return done(null, response.attributes)
