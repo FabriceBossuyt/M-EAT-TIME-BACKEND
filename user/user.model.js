@@ -17,7 +17,7 @@ module.exports = ModelBase.extend({
     return this.hasOne(PasswordReset, 'password_reset_token_id');
   },
   roles() {
-    return this.belongsToMany(Role, 'user_role');
+    return this.belongsToMany(Role, 'users_roles');
   },
   validPassword(password) {
     return bcrypt.compareAsync(password, this.attributes.password);

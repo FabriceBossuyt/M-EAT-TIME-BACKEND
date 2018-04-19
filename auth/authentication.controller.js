@@ -9,15 +9,27 @@ var securityConfig = require('../config/security.config.js');
 var passport = require('passport')
 var crypto = require('crypto')
 var moment = require('moment');
+var FB = require('fb');
 
 const router = express.Router();
 
+var updateFacebookUser = function (user, accessToken) {
+  return user.save({ facebook_access_token: accessToken });
+}
+
+var createFacebookUser = function (user, accessToken, profile) {
+  return user.save({
+    facebook_access_token: accessToken
+    //username: profile.name.givenName + profile.name.familyName
+  });
+}
+
 router.post('/login', (req, res) => {
   console.log('Attempting to log in ')
-  console.log(req.body);
 
   var email = req.body.email;
   var password = req.body.password
+
   Promise.coroutine(function* () {
     const user = yield User.where('email', email).fetch();
     const isValidPassword = yield user.validPassword(password);
@@ -52,14 +64,31 @@ router.post('/register', (req, res) => {
     );
 });
 
-router.get('/facebook',
-  passport.authenticate('facebook', { session: false, scope: ['email'] }), function (req, res) { }
-);
-
 router.post('/facebook', (req, res) => {
   var accessToken = req.body.accessToken; 
-}
-);
+  FB.setAccessToken(accessToken);
+  
+  FB.api('me', { fields: ['id', 'first_name', 'last_name' ,'email']}, function (res) {
+    var user = User.forge({ 
+      facebook_id: res.id, 
+      first_name: res.first_name,
+      last_name: res.last_name,
+      email: res.email, 
+    });
+
+    user.fetch({ withRelated: 'roles' }).then(function (model) {
+      user.save({facebook_access_token: accessToken});
+    });
+      
+  });
+  
+  User.forge({facebook_access_token: accessToken}).fetch({ withRelated: 'roles' }).then(function(model){
+    var user = User.forge(model);
+    var token = jwt.encode(user.omit('password'), securityConfig.jwtSecret);
+    res.status(200).send({token: `JWT ${token}` });
+  });
+
+});
 
 router.get('/facebook/callback',
   passport.authenticate('facebook', { session: false, failureRedirect: "/" }),
