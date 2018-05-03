@@ -4,8 +4,8 @@ var bookshelf = require('../config/bookshelf.config.js');
 var ModelBase = require('bookshelf-modelbase')(bookshelf);
 var Promise = require('bluebird');
 var bcrypt = Promise.promisifyAll(require('bcrypt'));
-var Role = require('../role/role.model.js');
-var PasswordReset = require('../password_reset_token/password_reset_token.model.js');
+var Role = require('../models/role.model.js');
+var PasswordReset = require('../models/password_reset_token.model.js');
 var securityConfig = require('../config/security.config.js');
 var Joi = require('joi');
 var moment = require('moment');
@@ -17,7 +17,7 @@ module.exports = ModelBase.extend({
     return this.hasOne(PasswordReset, 'password_reset_token_id');
   },
   roles() {
-    return this.belongsToMany(Role, 'users_roles');
+    return this.belongsToMany(Role, 'user_role');
   },
   validPassword(password) {
     return bcrypt.compareAsync(password, this.attributes.password);

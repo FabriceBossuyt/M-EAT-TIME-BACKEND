@@ -1,7 +1,7 @@
 'use strict';
 
 const bookshelf = require('../config/bookshelf.config.js');
-const User = require('../user/user.model.js');
+const User = require('../models/user.model.js');
 var Promise = require('bluebird');
 var bcrypt = Promise.promisifyAll(require('bcrypt'));
 var securityConfig = require('../config/security.config.js');

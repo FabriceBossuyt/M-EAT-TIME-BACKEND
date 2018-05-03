@@ -8,12 +8,23 @@ var conn = {
 }
 
 var Promise = require('bluebird');
-var userMigration = require('./user/user.migration.js')
-var roleMigration = require('./role/role.migration.js');
-var passwordResetMigration = require('./password_reset_token/password_reset_token.migration.js');
-var userRoleMigration = require('./user_role/user_role.migration.js');
-var knex = require('knex')(require('./config/database.config.js'));
 
+var userMigration = require('./migrations/user.migration.js')
+var roleMigration = require('./migrations/role.migration.js');
+var passwordResetMigration = require('./migrations/password_reset_token.migration.js');
+var userRoleMigration = require('./migrations/user_role.migration.js');
+var ingredientMigration = require('./migrations/ingredient.migration.js');
+var recipeMigration = require('./migrations/recipe.migration.js');
+var mealMigration = require('./migrations/meal.migration.js');
+var mealIngredientMigration = require('./migrations/meal_ingredient.migration.js');
+var mealRecipeMigration = require('./migrations/meal_recipe.migration.js');
+var recipeIngredientMigration = require('./migrations/recipe_ingredient.migration.js');
+var userIngredientMigration = require('./migrations/meal_recipe.migration.js');
+var userMealMigration = require('./migrations/user_meal.migration.js');
+var userRecipeMigration = require('./migrations/user_recipe.migration.js');
+
+
+var knex = require('knex')(require('./config/database.config.js'));
 var knex2 = require('knex')({ client: 'mysql', connection: conn });
 
 module.exports = function initDb() {
@@ -38,7 +49,7 @@ module.exports = function initDb() {
           }
         })
 
-        yield knex.schema.hasTable('users_roles').then(function (exists) {
+        yield knex.schema.hasTable('user_role').then(function (exists) {
           if (!exists) {
             userRoleMigration.up().then(function () {
               console.log("User_role table made")
@@ -50,6 +61,78 @@ module.exports = function initDb() {
           if (!exists) {
             passwordResetMigration.up().then(function () {
               console.log("Password_reset_token table made")
+            })
+          }
+        })
+
+        yield knex.schema.hasTable('ingredients').then(function (exists) {
+          if (!exists) {
+            ingredientMigration.up().then(function () {
+              console.log("Ingredients table made")
+            })
+          }
+        })
+
+        yield knex.schema.hasTable('recipes').then(function (exists) {
+          if (!exists) {
+            recipeMigration.up().then(function () {
+              console.log("Recipes table made")
+            })
+          }
+        })
+
+        yield knex.schema.hasTable('meals').then(function (exists) {
+          if (!exists) {
+            mealMigration.up().then(function () {
+              console.log("Meals table made")
+            })
+          }
+        })
+
+        yield knex.schema.hasTable('meal_ingredient').then(function (exists) {
+          if (!exists) {
+            mealIngredientMigration.up().then(function () {
+              console.log("Meal Ingredient table made")
+            })
+          }
+        })
+
+        yield knex.schema.hasTable('meal_recipe').then(function (exists) {
+          if (!exists) {
+            mealRecipeMigration.up().then(function () {
+              console.log("Meal recipe table made")
+            })
+          }
+        })
+
+        yield knex.schema.hasTable('recipe_ingredient').then(function (exists) {
+          if (!exists) {
+            recipeIngredientMigration.up().then(function () {
+              console.log("Recipe Ingredient table made")
+            })
+          }
+        })
+
+        yield knex.schema.hasTable('user_ingredient').then(function (exists) {
+          if (!exists) {
+            userIngredientMigration.up().then(function () {
+              console.log("User Ingredient table made")
+            })
+          }
+        })
+
+        yield knex.schema.hasTable('user_meal').then(function (exists) {
+          if (!exists) {
+            userMealMigration.up().then(function () {
+              console.log("User meal table made")
+            })
+          }
+        })
+
+        yield knex.schema.hasTable('user_recipe').then(function (exists) {
+          if (!exists) {
+            userRecipeMigration.up().then(function () {
+              console.log("User Recipe table made")
             })
           }
         })

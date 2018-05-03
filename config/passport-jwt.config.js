@@ -6,7 +6,7 @@ var ExtractJwt = require('passport-jwt').ExtractJwt;
 var securityConfig = require('./security.config.js');
 var FacebookStrategy = require('passport-facebook');
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
-var User = require('../user/user.model.js');
+var User = require('../models/user.model.js');
 
 var facebookOptions = {
   clientID: '1218309744962656',
