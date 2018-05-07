@@ -3,6 +3,7 @@
 const bookshelf = require('../config/bookshelf.config.js');
 const User = require('../models/user.model.js');
 const Recipe = require('../models/recipe.model.js')
+const Meal = require('../models/meal.model.js')
 
 module.exports = bookshelf.Model.extend({
     tableName: 'ingredients',

@@ -4,11 +4,15 @@ var bookshelf = require('../config/bookshelf.config.js');
 var ModelBase = require('bookshelf-modelbase')(bookshelf);
 var Promise = require('bluebird');
 var bcrypt = Promise.promisifyAll(require('bcrypt'));
-var Role = require('../models/role.model.js');
-var PasswordReset = require('../models/password_reset_token.model.js');
 var securityConfig = require('../config/security.config.js');
 var Joi = require('joi');
 var moment = require('moment');
+
+var Role = require('../models/role.model.js');
+var PasswordReset = require('../models/password_reset_token.model.js');
+var Recipe = require('../models/recipe.model.js') 
+var Ingredient = require('../models/ingredient.model.js')
+var Meal = require('../models/meal.model.js')
 
 module.exports = ModelBase.extend({
   tableName: 'users',
@@ -21,6 +25,15 @@ module.exports = ModelBase.extend({
   },
   validPassword(password) {
     return bcrypt.compareAsync(password, this.attributes.password);
+  },
+  meals () {
+    return this.belongsToMany(Ingredient, 'user_meal')
+  },
+  ingredients () {
+    return this.belongsToMany(Ingredient, 'user_ingredient')
+  },
+  recipes () {
+    return this.belongsToMany(Ingredient, 'user_recipe')
   },
   initialize() {
     this.on('saving', model => {

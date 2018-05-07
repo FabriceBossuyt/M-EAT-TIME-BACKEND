@@ -8,6 +8,7 @@ exports.up = function() {
   .createTableIfNotExists('meal_recipe', function(table) {
     table.integer('meal_id').unsigned().references('meals.id').notNullable();
     table.integer('recipe_id').unsigned().references('recipes.id').notNullable();
+    table.integer('quantity').notNullable();
   })
 };
 

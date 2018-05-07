@@ -8,12 +8,13 @@ exports.up = function() {
   .createTableIfNotExists('recipe_ingredient', function(table) {
     table.integer('recipe_id').unsigned().references('recipes.id').notNullable();
     table.integer('ingredient_id').unsigned().references('ingredients.id').notNullable();
+    table.integer('quantity').notNullable();
   })
 };
 
 exports.down = function() {
   return knex.schema
-  .dropTable('user_role')
+  .dropTable('recipe_ingredient')
 };
 
 module.exports = exports;

@@ -9,6 +9,7 @@ exports.up = function() {
     table.increments('id').primary();
     table.string("name").unique().notNullable();
     table.decimal("calories").nullable();
+    table.string("unit").notNullable();
     table.timestamps();
   })
 };

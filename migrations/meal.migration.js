@@ -5,7 +5,7 @@ var knex = require('knex')(dbConfig)
 
 exports.up = function() {
   return knex.schema
-  .createTableIfNotExists('ingredients', function(table) {
+  .createTableIfNotExists('meals', function(table) {
     table.increments('id').primary();
     table.timestamps();
   })
@@ -13,7 +13,7 @@ exports.up = function() {
 
 exports.down = function() {
   return knex.schema
-  .dropTable('ingredients')
+  .dropTable('meals')
 };
 
 module.exports = exports;
