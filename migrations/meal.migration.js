@@ -7,6 +7,8 @@ exports.up = function() {
   return knex.schema
   .createTableIfNotExists('meals', function(table) {
     table.increments('id').primary();
+    table.date("day").notNullable();
+    table.string("meal_type").notNullable();
     table.timestamps();
   })
 };
